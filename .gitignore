@@ -2,3 +2,6 @@
 .bundle
 /vendor
 /output/*
+config/google_service_account.json
+config/oauth_credentials.json
+config/google_client.yaml
