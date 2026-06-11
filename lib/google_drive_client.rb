@@ -1,6 +1,5 @@
 require "google/apis/drive_v3"
-require "googleauth"
-require "googleauth/stores/file_token_store"
+require "signet/oauth_2/client"
 
 class GoogleDriveClient
   attr_reader :drive
@@ -12,7 +11,7 @@ class GoogleDriveClient
     @drive = Google::Apis::DriveV3::DriveService.new
     @drive.client_options.application_name = APPLICATION_NAME
 
-    @drive.authorization = authorizer.get_credentials("default")
+    @drive.authorization = credentials
   end
 
   def upload(local_file:)
@@ -38,21 +37,16 @@ class GoogleDriveClient
 
   private
 
-  def authorizer
-    client_id =
-      Google::Auth::ClientId.from_file(
-        "config/oauth_client.json"
-      )
-
-    token_store =
-      Google::Auth::Stores::FileTokenStore.new(
-        file: "config/google_token.yaml"
-      )
-
-    Google::Auth::UserAuthorizer.new(
-      client_id,
-      SCOPE,
-      token_store
+  def credentials
+    client = Signet::OAuth2::Client.new(
+      token_credential_uri: "https://oauth2.googleapis.com/token",
+      client_id: ENV.fetch("OAUTH_CLIENT_ID"),
+      client_secret: ENV.fetch("OAUTH_CLIENT_SECRET"),
+      refresh_token: ENV.fetch("OAUTH_REFRESH_TOKEN")
     )
+
+    client.fetch_access_token!
+
+    client
   end
 end
