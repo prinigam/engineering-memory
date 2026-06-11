@@ -1,4 +1,4 @@
-require "dotenv/load"
+require "dotenv/load" if ENV["RACK_ENV"] != "production"
 require "json"
 require "sinatra"
 
